@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Omnibank Virtual Assistant</title>
+    <link rel="stylesheet" href="static/styles/style.css" />
+   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+   <script src="/static/js/app.js" type="module"></script>
+ </head>
+ <body>
+   <main id="chatAppContainer" class="chat-app-container">
+   
+
+
+     <div id="chatContainer" class="chat-container">
+       <header class="chat-header">
+           <h1>Omnibank Bank Virtual Assistant</h1>
+           <div class="header-controls">
+               <div class="settings-group" style="display:none">
+                   <label for="languageSelector">Language:</label>
+                   <select id="languageSelector">
+                       <option value="en-US">English (US)</option>
+                       <option value="es-ES">Español (España)</option>
+                       <option value="es-US">Español (US)</option>
+                   </select>
+               </div>
+               <div class="settings-group" style="margin-right:83px">
+                   <label for="devModeToggle">Dev Mode:</label>
+                   <label class="switch">
+                       <input type="checkbox" id="devModeToggle">
+                       <span class="slider"></span>
+                   </label>
+               </div>
+           </div>
+       </header>
+
+
+       <div id="messages">
+           <div class="message-wrapper agent-wrapper">
+               <p class="agent-message">Welcome to Omnibank. How can I assist you today?</p>
+           </div>
+           
+       </div>
+       <video id="videoFeed" class="video-feed hidden" autoplay muted playsinline></video>
+
+
+       <div class="bottom-panel">
+           <div id="connectionStatus" class="">Connecting...</div>
+           <form id="messageForm">
+             <button type="button" id="startAudioButton" aria-label="Start Audio Recording">
+               <span class="material-symbols-outlined">mic</span>
+             </button>
+             <button type="button" id="stopAudioButton" aria-label="Stop Audio Recording" class="hidden">
+               <span class="material-symbols-outlined">stop_circle</span>
+             </button>
+
+
+             <div class="input-container">
+               <label for="message">Enter your message</label>
+               <input type="text" id="message" name="message" placeholder="Type your message here..." />
+             </div>
+             <button type="submit" id="sendButton"  aria-label="Send Message">
+               <span class="material-symbols-outlined">send</span>
+             </button>
+                           <button type="button" id="startVideoButton" aria-label="Start Camera">
+               <span class="material-symbols-outlined">videocam</span>
+             </button>
+             <button type="button" id="stopVideoButton" aria-label="Stop Camera" class="hidden">
+               <span class="material-symbols-outlined">videocam_off</span>
+             </button>
+             <button type="button" id="startScreenButton" aria-label="Start Screen Share">
+               <span class="material-symbols-outlined">present_to_all</span>
+             </button>
+             <button type="button" id="stopScreenButton" aria-label="Stop Screen Share" class="hidden">
+               <span class="material-symbols-outlined">cancel_presentation</span>
+             </button>
+             <input type="file" id="imageUploadInput" accept="image/*" class="hidden" />
+             <button type="button" id="imageUploadButton" aria-label="Upload an Image">
+                 <span class="material-symbols-outlined">image</span>
+             </button>
+           </form>
+       </div>
+     </div>
+   </main>
+ </body>
+</html>

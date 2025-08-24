@@ -15,27 +15,27 @@ OmniBank Assistant is an AI-first conversational banking assistant that accepts 
 
 ## Project structure
 
-OmniBank_Assistant-main/
+OmniBank_Assistant-main/                                                                                                                                                                                            
 │── main.py                  # FastAPI entry point (API routes / routing logic)                                                                                                                                     
-│── requirements.txt         # Python dependencies
-│── Dockerfile               # Containerization instructions
-│── deploy.sh                # Deployment helper script
-│── .env                     # Environment variables (gitignored)
-│── banking_agent/           # Core assistant logic
-│   ├── agent.py             # Orchestrates model calls and high-level AI logic
-│   ├── context.py           # Conversation context / state management
-│   └── tools.py             # Banking helper tools (balance, transactions, etc.)
-│── frontend/
-│   └── static/
-│       ├── index.html       # Frontend UI (chat + voice)
-│       ├── js/
-│       │   ├── app.js                   # Main chat UI & fetch logic
-│       │   ├── audio-recorder-*.js      # Recorder / AudioWorklet for capture
-│       │   └── pcm-player-*.js          # PCM playback
-│       └── styles/
-│           └── style.css
-│── README.md
-│── LICENSE
+│── requirements.txt         # Python dependencies                                                                                                                                                                  
+│── Dockerfile               # Containerization instructions                                                                                                                                                        
+│── deploy.sh                # Deployment helper script                                                                                                                                                             
+│── .env                     # Environment variables (gitignored)                                                                                                                                                   
+│── banking_agent/           # Core assistant logic                                                                                                                                                                 
+│   ├── agent.py             # Orchestrates model calls and high-level AI logic                                                                                                                                     
+│   ├── context.py           # Conversation context / state management                                                                                                                                              
+│   └── tools.py             # Banking helper tools (balance, transactions, etc.)                                                                                                                                   
+│── frontend/                                                                                                                                                                                                       
+│   └── static/                                                                                                                                                                                                     
+│       ├── index.html       # Frontend UI (chat + voice)                                                                                                                                                           
+│       ├── js/                                                                                                                                                                                                     
+│       │   ├── app.js                   # Main chat UI & fetch logic                                                                                                                                               
+│       │   ├── audio-recorder-*.js      # Recorder / AudioWorklet for capture                                                                                                                                      
+│       │   └── pcm-player-*.js          # PCM playback                                                                                                                                                             
+│       └── styles/                                                                                                                                                                                                 
+│           └── style.css                                                                                                                                                                                           
+│── README.md                                                                                                                                                                                                       
+│── LICENSE                                                                                                                                                                                                         
 
 ---
 

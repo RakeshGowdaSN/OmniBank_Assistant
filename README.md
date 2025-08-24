@@ -15,27 +15,31 @@ OmniBank Assistant is an AI-first conversational banking assistant that accepts 
 
 ## Project structure
 
-OmniBank_Assistant-main/                                                                                                                                                                                            
-│── main.py                  # FastAPI entry point (API routes / routing logic)                                                                                                                                     
-│── requirements.txt         # Python dependencies                                                                                                                                                                  
-│── Dockerfile               # Containerization instructions                                                                                                                                                        
-│── deploy.sh                # Deployment helper script                                                                                                                                                             
-│── .env                     # Environment variables (gitignored)                                                                                                                                                   
-│── banking_agent/           # Core assistant logic                                                                                                                                                                 
-│   ├── agent.py             # Orchestrates model calls and high-level AI logic                                                                                                                                     
-│   ├── context.py           # Conversation context / state management                                                                                                                                              
-│   └── tools.py             # Banking helper tools (balance, transactions, etc.)                                                                                                                                   
-│── frontend/                                                                                                                                                                                                       
-│   └── static/                                                                                                                                                                                                     
-│       ├── index.html       # Frontend UI (chat + voice)                                                                                                                                                           
-│       ├── js/                                                                                                                                                                                                     
-│       │   ├── app.js                   # Main chat UI & fetch logic                                                                                                                                               
-│       │   ├── audio-recorder-*.js      # Recorder / AudioWorklet for capture                                                                                                                                      
-│       │   └── pcm-player-*.js          # PCM playback                                                                                                                                                             
-│       └── styles/                                                                                                                                                                                                 
-│           └── style.css                                                                                                                                                                                           
-│── README.md                                                                                                                                                                                                       
-│── LICENSE                                                                                                                                                                                                         
+OmniBank_Assistant-main/
+│
+├── main.py                     # FastAPI entry point for API routes and routing logic 
+├── requirements.txt            # Python dependencies for the project 
+├── Dockerfile                  # Instructions for containerizing the application 
+├── deploy.sh                   # A helper script to build and deploy the application to Cloud Run
+├── .env                        # Environment variables, including API keys and project IDs (gitignored) 
+│
+├── banking_agent/              # Core logic for the AI assistant
+│   ├── agent.py                # Orchestrates model calls and high-level AI logic
+│   ├── context.py              # Manages conversation context and state
+│   └── tools.py                # Defines banking-specific helper tools (e.g., for balance, transactions)
+│
+├── frontend/                   # Frontend UI files
+│   └── static/
+│       ├── index.html          # Main frontend page with the chat and voice interface
+│       ├── js/
+│       │   ├── app.js          # Main chat UI and fetch logic
+│       │   ├── audio-recorder-.js  # Audio recorder for capturing user input
+│       │   └── pcm-player-.js      # PCM audio playback for the assistant's responses
+│       └── styles/
+│           └── style.css       # Styles for the frontend UI
+│
+├── README.md                   # This file
+└── LICENSE                     # The project license                                                                                                                                                                                                     
 
 ---
 

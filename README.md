@@ -1,46 +1,54 @@
 # OmniBank Assistant 🏦💬
 
-OmniBank Assistant is an AI-first conversational banking assistant that accepts both text and raw audio (PCM) input. The repo forwards raw PCM audio through the stack to an audio-capable model (via Google ADK / Gemini Live) — there is no local speech-to-text step. The model performs audio understanding and (optionally) returns synthesized audio plus structured JSON.
+OmniBank Assistant is an AI-first conversational banking assistant that supports both text and raw audio (PCM) inputs. The system is designed to handle low-latency voice interactions by directly forwarding raw audio to an audio-capable model (e.g., Google ADK / Gemini Live).
+
+## Key technical highlights:
+
+No local speech-to-text (STT): Unlike traditional pipelines, the assistant does not convert audio to text locally. Instead, raw PCM audio is streamed directly to the model, which performs audio understanding natively.
+Bidirectional streaming: The backend uses Google ADK's Runner with StreamingMode.BIDI to enable real-time communication between the client and the model.
+Model capabilities:
+Understands raw audio inputs (ASR and intent recognition in one step).
+Returns structured JSON responses (e.g., intents, entities, tool calls).
+Optionally synthesizes audio responses (base64 PCM) for playback.
+Frontend integration: The browser captures audio using the Web Audio API and streams it to the backend via WebSocket. The backend relays the audio to the model and returns responses to the client.
 
 ---
+## Layman-Friendly Explanation
+OmniBank Assistant is like having a personal banker you can talk to or chat with online. Here’s how it works:
 
-## Quick summary
-
-- No local STT: frontend streams raw PCM (base64 in JSON frames) to the backend WebSocket; backend sends binary to the ADK/GenAI runner unchanged.
-- Low-latency voice interactions via bidirectional streaming (RunConfig.streaming_mode = BIDI).
-- Uses Google ADK Runner + LiveRequestQueue to forward text/audio to the model.
-- Backend: FastAPI + Uvicorn. Frontend: Vanilla JS + Web Audio API + AudioWorklet processors.
-
----
+Talk or type: You can either type your questions (e.g., "What’s my balance?") or speak naturally into your microphone (e.g., "Can you transfer $200 to my savings?").
+Smart listening: The assistant listens to your voice and sends it directly to a powerful AI model that understands what you’re saying — no need to convert your voice into text first.
+Quick responses: The AI figures out what you want, like checking your balance or making a transfer, and sends back a response. It can even talk back to you with a voice reply!
+Safe and secure: Your voice and data are sent securely, and the assistant doesn’t store your audio locally.
+This makes the assistant fast, easy to use, and perfect for managing your banking needs on the go.
 
 ## Project structure
 
-OmniBank_Assistant-main/                                                                                                                                                                                            
-│                                                                                                                                                                                            
-├── main.py                     # FastAPI entry point for API routes and routing logic                                                                                                                              
-├── requirements.txt            # Python dependencies for the project                                                                                                                                               
-├── Dockerfile                  # Instructions for containerizing the application                                                                                                                                   
-├── deploy.sh                   # A helper script to build and deploy the application to Cloud Run                                                                                                                  
-├── .env                        # Environment variables, including API keys and project IDs (gitignored)                                                                                                            
-│                                                                                                                                                                                            
-├── banking_agent/              # Core logic for the AI assistant                                                                                                                                                   
-│   ├── agent.py                # Orchestrates model calls and high-level AI logic                                                                                                                                  
-│   ├── context.py              # Manages conversation context and state                                                                                                                                            
-│   └── tools.py                # Defines banking-specific helper tools (e.g., for balance, transactions)                                                                                                           
-│                                                                                                                                                                                            
-├── frontend/                   # Frontend UI files                                                                                                                                                                 
-│   └── static/                                                                                                                                                                                            
-│       ├── index.html          # Main frontend page with the chat and voice interface                                                                                                                              
-│       ├── js/                                                                                                                                                                                            
-│       │   ├── app.js          # Main chat UI and fetch logic                                                                                                                                                      
-│       │   ├── audio-recorder-.js  # Audio recorder for capturing user input                                                                                                                                       
-│       │   └── pcm-player-.js      # PCM audio playback for the assistant's responses                                                                                                                              
-│       └── styles/                                                                                                                                                                                            
-│           └── style.css       # Styles for the frontend UI                                                                                                                                                        
-│                                                                                                                                                                                            
-├── README.md                   # This file                                                                                                                                                                         
-└── LICENSE                     # The project license                                                                                                                                                                                                                                                                                                                                         
-
+OmniBank_Assistant-main/
+│
+├── main.py # FastAPI entry point for API routes and routing logic
+├── requirements.txt # Python dependencies for the project
+├── Dockerfile # Instructions for containerizing the application
+├── deploy.sh # A helper script to build and deploy the application to Cloud Run
+├── .env # Environment variables, including API keys and project IDs (gitignored)
+│
+├── banking_agent/ # Core logic for the AI assistant
+│ ├── agent.py # Orchestrates model calls and high-level AI logic
+│ ├── context.py # Manages conversation context and state
+│ └── tools.py # Defines banking-specific helper tools (e.g., for balance, transactions)
+│
+├── frontend/ # Frontend UI files
+│ └── static/
+│ ├── index.html # Main frontend page with the chat and voice interface
+│ ├── js/
+│ │ ├── app.js # Main chat UI and fetch logic
+│ │ ├── audio-recorder-.js # Audio recorder for capturing user input
+│ │ └── pcm-player-.js # PCM audio playback for the assistant's responses
+│ └── styles/
+│ └── style.css # Styles for the frontend UI
+│
+├── README.md # This file
+└── LICENSE # The project license
 ---
 
 ## Tech stack
@@ -131,6 +139,68 @@ Behavior:
 See implementation in [main.py](main.py).
 
 ---
+
+## User journey — how OmniBank Assistant works (use-case view)
+
+1. User arrives at the UI
+   - Opens the web app (GET / serves frontend/static/index.html).
+   - Sees a chat UI with text input and a microphone button for voice.
+
+2. User starts a conversation
+   - Text path: user types "What's my checking balance?" and presses send.
+   - Voice path: user taps the mic, speaks naturally — e.g., "Hey, what is my balance and any recent large transactions?"
+
+3. Browser captures audio
+   - The frontend captures raw PCM via getUserMedia + AudioWorklet (pcm-recorder-processor).
+   - PCM frames are packaged and base64-encoded into JSON frames.
+
+4. Client streams to backend
+   - The browser opens a WebSocket to /ws/{session_id}?lang=en-US&is_audio=true.
+   - Audio frames (and text frames) are sent as JSON messages:
+     { "mime_type": "audio/pcm", "data": "<base64-pcm>" } or { "mime_type":"text/plain", "data":"..." }.
+
+5. Backend forwards audio unchanged to the model
+   - main.py decodes base64 and uses google.adk LiveRequestQueue.send_realtime(Blob(...)) to forward binary to the Runner.
+   - No local speech-to-text conversion occurs — the model receives raw audio and performs audio understanding natively.
+
+6. Model analyzes audio and returns structured output
+   - The model may return:
+     - Structured JSON (intent, entities, tool_call requests)
+     - Text transcripts or partial transcriptions
+     - Synthesized audio (base64 PCM) for spoken replies
+   - The backend relays these model events back to the client over the WebSocket.
+
+7. Frontend presents results and acts on tool results
+   - UI displays assistant text and partials in the chat.
+   - If synthesized audio is provided, the PCM player decodes the returned base64 PCM and plays it immediately.
+   - If the model requested a tool call (e.g., "check_balance"), the backend invokes banking_agent.tools, returns result events, and the assistant responds with formatted result: "Your checking balance is $X".
+
+8. Multi-turn flow & confirmations
+   - The system tracks conversation state in InMemorySessionService + banking_agent/context.py.
+   - Example: Assistant asks "Transfer $500 to savings — confirm?" User replies (voice/text); the same streaming flow handles the confirmation and completes the transaction via tools.
+
+Example quick scenario (voice):
+- User: speaks "Transfer two hundred to my savings."
+- Model: returns tool_call { name: "initiate_transfer", args: { amount: 200, to_account: "savings" } }
+- Backend: banking_agent.tools executes transfer (or simulates), returns tool_result.
+- Model: returns "Done — $200 moved to savings." and optional audio response.
+- Frontend: shows text and plays audio.
+
+Why no local STT?
+- Simpler pipeline: raw audio is sent to a single audio-capable model that does both ASR/understanding and synthesis.
+- Lower latency in bidirectional streaming (RunConfig.streaming_mode = BIDI).
+- Relies on the chosen model (Gemini Live / ADK Runner) for robust audio understanding and transcription.
+
+Implications / requirements
+- Audio format consistency matters: recommended 16-bit PCM, mono, 16k–48kHz.
+- Secure transport required: use WSS/TLS in production.
+- Model must support audio modalities & streaming (configured via google.adk RunConfig: response_modalities=["AUDIO"]).
+- Add authentication, RBAC, and audit before connecting to real banking backends.
+
+Actors & responsibilities
+- End user: interacts by speaking or typing; receives text and audio replies.
+- Frontend dev: ensure recorder/player processors produce the required PCM and chunk sizes; encode to base64; manage WS lifecycle.
+- Backend dev / integrator: ensure env vars (GOOGLE_API_KEY, PROJECT_ID, LOCATION, etc.), Runner/LiveRequestQueue usage, tool integrations, and secure deployment.
 
 ## WebSocket message formats (exact)
 

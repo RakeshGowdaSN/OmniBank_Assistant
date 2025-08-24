@@ -26,7 +26,7 @@ from banking_agent.tools import session_context
 
 load_dotenv()
 
-APP_NAME = "Santander Banking Assistant"
+APP_NAME = "Omni Banking Assistant"
 STATIC_DIR = Path("frontend/static")
 session_service = InMemorySessionService()
 

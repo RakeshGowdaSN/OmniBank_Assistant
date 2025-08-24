@@ -16,7 +16,7 @@ OmniBank Assistant is an AI-first conversational banking assistant that accepts 
 ## Project structure
 
 OmniBank_Assistant-main/
-│── main.py                  # FastAPI entry point (API routes / routing logic)
+│── main.py                  # FastAPI entry point (API routes / routing logic)                                                                                                                                     
 │── requirements.txt         # Python dependencies
 │── Dockerfile               # Containerization instructions
 │── deploy.sh                # Deployment helper script

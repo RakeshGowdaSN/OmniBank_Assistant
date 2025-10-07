@@ -1,4 +1,5 @@
-# main.py
+# main.py 
+
 import os
 import json
 import asyncio
@@ -24,11 +25,33 @@ from fastapi.middleware.cors import CORSMiddleware
 from banking_agent.agent import root_agent
 from banking_agent.tools import session_context
 
+from google.cloud import translate_v2 as translate
+
 load_dotenv()
 
-APP_NAME = "Omni Banking Assistant"
+APP_NAME = "Santander Banking Assistant"
 STATIC_DIR = Path("frontend/static")
 session_service = InMemorySessionService()
+
+try:
+    translate_client = translate.Client()
+    print("Google Translate client initialized successfully.")
+except Exception as e:
+    print(f"Error initializing Google Translate client: {e}")
+    translate_client = None
+
+def translate_text(text: str, target_language: str = "en") -> str:
+
+    """Translates text using the Google Cloud Translation API."""
+    if not translate_client:
+        print("Translate client not available. Returning original text.")
+        return text
+    try:
+        result = translate_client.translate(text, target_language=target_language)
+        return result["translatedText"]
+    except Exception as e:
+        print(f"Error during translation: {e}")
+        return text # Return original text on error
 
 async def start_agent_session(session_id: str, language_code: str):
     """Starts a dedicated banking agent session."""
@@ -74,19 +97,50 @@ async def agent_to_client_messaging(websocket: WebSocket, live_events, dev_mode:
                 "interrupted": event.interrupted
             }))
             continue
+
         if event.content and event.content.parts:
             author = event.content.role
             for part in event.content.parts:
+               # If there's text, send it with the correct type based on the author
                 if part.text:
-                    mime_type = "text/plain"
-                    if author == 'user': mime_type = "text/input_transcription"
-                    elif event.partial: mime_type = "text/transcription"
-                    await websocket.send_text(json.dumps({"mime_type": mime_type, "data": part.text}))
+                   # If the author is the USER, it's an input transcription
+                    if author == 'user':
+                       native_text = part.text
+                       print(f"Input language code: {native_text}")
+                       await websocket.send_text(json.dumps({
+                           "mime_type": "text/input_transcription",
+                           "data": native_text
+                       }))
+                       translated_list = []
+                       translated_eng_text = translate_text(native_text)
+                       translated_list.append(translated_eng_text)
+                       all_translations_str = "".join(translated_list)
+                       print(f"Complete Translated text: {all_translations_str}")
+                       await websocket.send_text(json.dumps({
+                           "mime_type": "text/input_translated",
+                           "data": all_translations_str
+                       }))
+                    # If the author is the MODEL, it's the agent's speech
+                    elif author == 'model':
+                        # Use the event.partial flag to distinguish live transcript from final text
+                        if event.partial:
+                           await websocket.send_text(json.dumps({
+                               "mime_type": "text/transcription",
+                               "data": part.text
+                           }))
+                        else:
+                           await websocket.send_text(json.dumps({
+                               "mime_type": "text/plain",
+                               "data": part.text
+                           }))
+
+                # Handle audio data from the agent (this remains the same)
                 elif part.inline_data and part.inline_data.mime_type.startswith("audio/"):
-                    await websocket.send_text(json.dumps({
-                        "mime_type": "audio/pcm",
-                        "data": base64.b64encode(part.inline_data.data).decode("ascii")
-                    }))
+                   await websocket.send_text(json.dumps({
+                       "mime_type": "audio/pcm",
+                       "data": base64.b64encode(part.inline_data.data).decode("ascii")
+                   }))
+
                 if dev_mode:
                     if part.function_call:
                         args_dict = {key: value for key, value in part.function_call.args.items()}
@@ -109,7 +163,13 @@ async def client_to_agent_messaging(websocket: WebSocket, live_request_queue: Li
 app = FastAPI()
 # origins = ["https://mms-ui-socket-new.en.enterprise-europe.flutterflow.app", "http://localhost", "http://localhost:8080"]
 origins = ["https://webviewsocket-da1tah.enterprise-europe.flutterflow.app", "http://localhost", "http://localhost:8080"]
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+app.add_middleware(CORSMiddleware, 
+                    allow_origins=["*"], 
+                    allow_credentials=True, 
+                    allow_methods=["*"], 
+                    allow_headers=["*"])
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")

@@ -4,3 +4,4 @@ google-genai
 python-dotenv
 fastapi[all]
 firebase-admin
+google-cloud-translate

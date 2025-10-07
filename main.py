@@ -29,7 +29,7 @@ from google.cloud import translate_v2 as translate
 
 load_dotenv()
 
-APP_NAME = "Santander Banking Assistant"
+APP_NAME = "Omnibank Assistant"
 STATIC_DIR = Path("frontend/static")
 session_service = InMemorySessionService()
 
